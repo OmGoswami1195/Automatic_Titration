@@ -1,4 +1,5 @@
 #& C:/ProgramData/anaconda3/python.exe c:/Users/user1/titrator_pub.py -s file -f "C:\\Users\\user1\\Downloads\\June 25, 2021.mp4"
+# python3 testing_frames.py -s file -f "/home/soumoroy/Downloads/June 25, 2021.mp4"
 import cv2 #OpenCV - main computer vision engine
 import math
 import numpy as np
