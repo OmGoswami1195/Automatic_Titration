@@ -7,6 +7,10 @@ import argparse
 import sys
 import glob
 from datetime import datetime
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from tkinter import *
+import logging
 import smtplib
 from email.mime.text import MIMEText
 
@@ -79,6 +83,8 @@ LINE_6 = (L_M,6*L_H) # --   6th line
 LINE_7 = (L_M,7*L_H) # --   7th line
 LINE_8 = (L_M,8*L_H) # --   8th line
 LINE_9 = (L_M,9*L_H) # --   9th line
+log_file = "titrator_log.txt"
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 #===============================================================================
 def HSV_HSV(HSV):
@@ -108,6 +114,7 @@ class Titrator(object):
 		dt = datetime.now() # current date and time
 		#Data-time stamp
 		DT = dt.strftime("%m%d%Y_%H%M%S")
+		self.logger = logging.getLogger("titrator")
 
 		#Script arguments:
 		ap = argparse.ArgumentParser()
@@ -185,6 +192,17 @@ class Titrator(object):
 		print("Volumetric calibration coefficients:")
 		print("CALIB_V_A: ",CALIB_V_A )
 		print("CALIB_V_A: ",CALIB_V_B ," mL ")
+		self.fig, self.ax = plt.subplots()
+		self.line_volume, = self.ax.plot([], [], label="Volume (mL)")
+		self.line_area, = self.ax.plot([], [], label="Area (px^2)")
+		self.ax.legend()
+		self.ani = FuncAnimation(self.fig, self.update_plot, frames=range(10),interval=1000)  # Update every 1000 milliseconds
+		self.x_data = []
+		self.volume_data = []
+		self.area_data = []
+
+
+
 		
 		#Volume of titration solution 
 		self.Volume = 0.0
@@ -238,6 +256,7 @@ class Titrator(object):
 		
 		if (self.CalibrationMode):
 			cv2.imwrite(self.ImageFile, Frame)
+			self.logger.info("Calibration image saved.")
 			return True
 		return False
 #-------------------------------------------------------------------------------
@@ -424,24 +443,58 @@ class Titrator(object):
 #-------------------------------------------------------------------------------
 	def DisplayImage(self, Frame):
 		cv2.imshow('Frame',Frame)
+		self.x_data.append(datetime.now())
+		self.volume_data.append(self.Volume)
+		self.area_data.append(self.Area)
+		plt.pause(0.001)
+		plt.ion()  # Turn on interactive mode
+		plt.show()  # Show the plot
 		if (cv2.waitKey(1) == 27):
+			self.logger.info("User pressed ESC to exit.")
 			return True
 		else:
 			return False
 #-------------------------------------------------------------------------------
+	def update_plot(self, frame):
+		# Measure volume of the titration solution
+		(warning, volume) = self.GetVolume(self.Frame()[1])
+		# Measure area of the colored indicator spot
+		area = self.GetArea(self.Frame()[1])
+
+        # Append data to arrays
+		self.x_data.append(datetime.now())
+		self.volume_data.append(volume)
+		self.area_data.append(area)
+
+        # Update the plot
+		self.line_volume.set_data(self.x_data, self.volume_data)
+		self.line_area.set_data(self.x_data, self.area_data)
+		self.ax.relim()
+		self.ax.autoscale_view()
+		return self.line_volume, self.line_area
+
+
+	
+	
+	
+	
 	def Finalize(self):
 		if self.Cap:
 			self.Cap.release()
 		cv2.destroyAllWindows()
-		
+		plt.close(self.fig)
 		if ( not self.CalibrationMode):
 			self.DataFile.close()
+			self.logger.info("Data file closed.")
+		self.logger.info("Titrator finalized.")
+
 		print("Done.")
 		return 0
 #===============================================================================
 def main():
 	#Initialize the titrator
 	T = Titrator()
+	T.logger.info("Titrator initialized.")
 
 	while True:
 		#Scan video input or read an image from the file
@@ -452,10 +505,12 @@ def main():
 			#Release all resources
 			cv2.waitKey(0)
 			T.Finalize()
+			T.logger.info("Exiting due to no frames.")
 			break
 
 		#Calibration mode (no measurements is performed)
 		if T.Calibration(Frame):
+			T.logger.info("Exiting calibration mode.")
 			break
 
 		T.WriteWelcome(Frame)
@@ -475,6 +530,7 @@ def main():
 
 		#Display the titrator with recognized objects
 		if T.DisplayImage(Frame):
+			T.logger.info("User exited the program.")
 			break
 
 	return 0
