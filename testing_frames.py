@@ -84,6 +84,9 @@ LINE_6 = (L_M,6*L_H) # --   6th line
 LINE_7 = (L_M,7*L_H) # --   7th line
 LINE_8 = (L_M,8*L_H) # --   8th line
 LINE_9 = (L_M,9*L_H) # --   9th line
+LINE_10 = (L_M,10*L_H) # --   10th line
+LINE_11 = (L_M,11*L_H) # --   11th line
+LINE_12 = (L_M,12*L_H) # --   12th line
 log_file = "titrator_log.txt"
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -169,11 +172,7 @@ class Titrator(object):
 			video_file_path = args["file"]
 			self.Cap = cv2.VideoCapture(video_file_path)
 			print("Source: Local Video File: ", video_file_path)
-        
-			
-        
-			
-        
+
 
 		fps = self.Cap.get(cv2.CAP_PROP_FPS) # Gets the frames per second
         
@@ -183,7 +182,7 @@ class Titrator(object):
 
 		#Calibration data
 		print("Calibration Data:")
-		print("Treshold area:", AREA_THRESHOLD, " px^2")
+		print("Threshold area:", AREA_THRESHOLD, " px^2")
 		
 		#Initial volume of the titrant
 		self.IniVolume = float(args["volume"])
@@ -191,7 +190,7 @@ class Titrator(object):
 				
 		#Volumetric calibration equation
 		print("Volumetric calibration coefficients:")
-		print("CALIB_V_A: ",CALIB_V_A )
+		print("CALIB_V_A: ",CALIB_V_A ," mL ")
 		print("CALIB_V_A: ",CALIB_V_B ," mL ")
 		self.fig, self.ax = plt.subplots()
 		self.line_volume, = self.ax.plot([], [], label="Volume (mL)")
@@ -201,8 +200,6 @@ class Titrator(object):
 		self.x_data = []
 		self.volume_data = []
 		self.area_data = []
-
-
 
 		
 		#Volume of titration solution 
@@ -287,9 +284,8 @@ class Titrator(object):
 		finally:
             # Disconnect from the SMTP server
 			server.quit()
-	
-	
-	
+
+
 	
 	def	GetCalibratedVolume(self,VU, VL, VM):
 		
@@ -440,8 +436,21 @@ class Titrator(object):
 		self.ImageText(Frame, "Endpoint:", LINE_7)
 		self.ImageText(Frame, Message_1, LINE_8)
 		self.ImageText(Frame, Message_2, LINE_9)
-		cv2.imwrite(self.ImageFile, Frame)
+		# cv2.imwrite(self.ImageFile, Frame)
 #-------------------------------------------------------------------------------
+	def WriteCalculatedResults(self, Frame, Volume):	
+		"""Calculation of the molarity"""
+		N1=0.1  # change as per soln
+		V1=10	# change as per soln
+		V2=Volume+VOL_MIN-self.IniVolume
+		N2=(N1*V1)/V2
+		Message_mol="Molarity of soln:"+'{:5.1f}'.format(N2)
+		self.ImageText(Frame, "", LINE_10) #Empty line
+		self.ImageText(Frame,"Calculation:",LINE_11)
+		self.ImageText(Frame,Message_mol,LINE_12)
+		cv2.imwrite(self.ImageFile, Frame)
+
+#--------------------------------------------------------------------------------
 	def DisplayImage(self, Frame):
 		cv2.imshow('Frame',Frame)
 		self.x_data.append(datetime.now())
@@ -521,13 +530,16 @@ def main():
 		#Measure area of the colored indicator spot 
 		Area = T.GetArea(Frame)
 
-		#Disaplay parameters
+		#Display parameters
 		T.WriteWarning(Frame, Warning)
 		T.WriteVolume(Frame, Volume)
 		T.WriteArea(Frame, Area)
 
 		#Is the end-point reached?
 		T.IsEndPoint(Frame, Volume, Area)
+
+		#Displaying calculations
+		T.WriteCalculatedResults(Frame,Volume)
 
 		#Display the titrator with recognized objects
 		if T.DisplayImage(Frame):
