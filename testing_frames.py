@@ -408,13 +408,14 @@ class Titrator(object):
 #-------------------------------------------------------------------------------
 	def WriteWarning(self, Frame, Warning):
 		"""Print warning message"""
-		self.ImageText(Frame, Warning, LINE_2)
+		Message_original= "Original soln:10 ml and molarity:0.1 "
+		self.ImageText(Frame, Message_original, LINE_2)
 #-------------------------------------------------------------------------------
 	def WriteVolume(self, Frame, Volume):
 		"""Display volume"""
 		#Display volume of the dispensed titrant (if negative due to noise then set to zero):
 		Vol_Dispensed = max(Volume+VOL_MIN-self.IniVolume, 0.0)
-		MessageVDisp = "Vol. Disp.: "+'{:5.1f}'.format(Vol_Dispensed)+" mL"
+		MessageVDisp = "Vol. Disp.: "+'{:5.3f}'.format(Vol_Dispensed)+" mL"
 		self.DataFile.write(str(Vol_Dispensed))
 		self.DataFile.write("\t")
 		self.ImageText(Frame, "", LINE_3) #Empty line
@@ -430,26 +431,23 @@ class Titrator(object):
 	def WriteEndPoint(self, Frame, Volume, Area):
 		"""Display titration completed message"""
 		Vol_Dispensed = Volume+VOL_MIN-self.IniVolume
-		Message_1 = "Vol. Disp.: "+'{:5.1f}'.format(Vol_Dispensed)+" mL"
+		Message_1 = "Vol. Disp.: "+'{:5.3f}'.format(Vol_Dispensed)+" mL"
 		Message_2 = "Area:    "+'{:5d}'.format(int(Area))+" px^2"
 		self.ImageText(Frame, "", LINE_6) #Empty line
 		self.ImageText(Frame, "Endpoint:", LINE_7)
 		self.ImageText(Frame, Message_1, LINE_8)
 		self.ImageText(Frame, Message_2, LINE_9)
-		# cv2.imwrite(self.ImageFile, Frame)
-#-------------------------------------------------------------------------------
-	def WriteCalculatedResults(self, Frame, Volume):	
+		
 		"""Calculation of the molarity"""
 		N1=0.1  # change as per soln
 		V1=10	# change as per soln
 		V2=Volume+VOL_MIN-self.IniVolume
 		N2=(N1*V1)/V2
-		Message_mol="Molarity of soln:"+'{:5.1f}'.format(N2)
+		Message_mol="Molarity of soln:"+'{:5.3f}'.format(N2)
 		self.ImageText(Frame, "", LINE_10) #Empty line
 		self.ImageText(Frame,"Calculation:",LINE_11)
 		self.ImageText(Frame,Message_mol,LINE_12)
 		cv2.imwrite(self.ImageFile, Frame)
-
 #--------------------------------------------------------------------------------
 	def DisplayImage(self, Frame):
 		cv2.imshow('Frame',Frame)
@@ -537,9 +535,6 @@ def main():
 
 		#Is the end-point reached?
 		T.IsEndPoint(Frame, Volume, Area)
-
-		#Displaying calculations
-		T.WriteCalculatedResults(Frame,Volume)
 
 		#Display the titrator with recognized objects
 		if T.DisplayImage(Frame):
