@@ -112,7 +112,7 @@ class Titrator(object):
         if ( Source == SOURCE_URL ): 
             self.URL = args["input"]
             video_url = pafy.new(self.URL)
-            Get the highest resolution available 
+            #Get the highest resolution available 
             video_stream = video_url.getbest(preftype="mp4")
             # video_stream = "/Users/omgoswami/Downloads/June 25, 2021.mp4"
             self.Cap = cv2.VideoCapture() 

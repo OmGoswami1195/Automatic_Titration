@@ -13,8 +13,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from tkinter import *
 import logging
-import smtplib
-from email.mime.text import MIMEText
+# from machine import Pin
+# from utime import sleep
+# from picozero import Speaker
+from time import sleep
 
 #Calibration of the phenolphthalein solution color at high pH (NaOH solution at 0.1M):
 
@@ -259,32 +261,32 @@ class Titrator(object):
 			return True
 		return False
 #-------------------------------------------------------------------------------
-	def SendEmailNotification(self, subject, message):
-		sender_email = "r.rohanraj.2001@gmail.com"  # Replace with your email
-		receiver_email = "rohan.raj2021@vitstudent.ac.in"  # Replace with recipient's email
-		password = "Jaihind@17"  # Replace with your email password
+	# def SendEmailNotification(self, subject, message):
+	# 	sender_email = "r.rohanraj.2001@gmail.com"  # Replace with your email
+	# 	receiver_email = "rohan.raj2021@vitstudent.ac.in"  # Replace with recipient's email
+	# 	password = "Jaihind@17"  # Replace with your email password
 
-        # Create the email message
-		msg = MIMEText(message)
-		msg["Subject"] = subject
-		msg["From"] = sender_email
-		msg["To"] = receiver_email
-		try:
-			# Connect to the SMTP server
-			server = smtplib.SMTP("smtp.gmail.com", 587)
-			server.starttls()
+    #     # Create the email message
+	# 	msg = MIMEText(message)
+	# 	msg["Subject"] = subject
+	# 	msg["From"] = sender_email
+	# 	msg["To"] = receiver_email
+	# 	try:
+	# 		# Connect to the SMTP server
+	# 		server = smtplib.SMTP("smtp.gmail.com", 587)
+	# 		server.starttls()
 
-            # Login to your email account
-			server.login(sender_email, password)
+    #         # Login to your email account
+	# 		server.login(sender_email, password)
 
-            # Send the email
-			server.sendmail(sender_email, receiver_email, msg.as_string())
-			print("Email notification sent successfully!")
-		except Exception as e:
-			print("Error sending email notification:", str(e))
-		finally:
-            # Disconnect from the SMTP server
-			server.quit()
+    #         # Send the email
+	# 		server.sendmail(sender_email, receiver_email, msg.as_string())
+	# 		print("Email notification sent successfully!")
+	# 	except Exception as e:
+	# 		print("Error sending email notification:", str(e))
+	# 	finally:
+    #         # Disconnect from the SMTP server
+	# 		server.quit()
 
 
 	
@@ -384,10 +386,20 @@ class Titrator(object):
 				self.EndPointVolume  = Volume
 				self.EndPointReached = True
 				# Send email notification when endpoint is reached
-				subject = "Titrator: Endpoint Reached"
-				message = f"The titration is complete. Endpoint reached with volume: {Volume} mL and area: {Area} px^2."
-				self.SendEmailNotification(subject, message)
-				
+				# subject = "Titrator: Endpoint Reached"
+				# message = f"The titration is complete. Endpoint reached with volume: {Volume} mL and area: {Area} px^2."
+				# self.SendEmailNotification(subject, message)
+
+				# code for led and buzzer
+				# led = Pin(5,Pin.OUT)
+				# speaker = Speaker(15)
+				# while True:
+				# 	led.toggle()
+				# 	sleep(0.5)
+				# 	speaker.on()
+				# 	sleep(1)
+				# 	speaker.off()
+				# 	sleep(1)
 
 		if (self.EndPointReached):
 			self.WriteEndPoint(Frame, self.EndPointVolume, self.EndPointArea)
