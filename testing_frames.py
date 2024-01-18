@@ -390,6 +390,9 @@ class Titrator(object):
 				# message = f"The titration is complete. Endpoint reached with volume: {Volume} mL and area: {Area} px^2."
 				# self.SendEmailNotification(subject, message)
 
+
+		if (self.EndPointReached):
+			self.WriteEndPoint(Frame, self.EndPointVolume, self.EndPointArea)
 				# code for led and buzzer
 				# led = Pin(5,Pin.OUT)
 				# speaker = Speaker(15)
@@ -400,9 +403,6 @@ class Titrator(object):
 				# 	sleep(1)
 				# 	speaker.off()
 				# 	sleep(1)
-
-		if (self.EndPointReached):
-			self.WriteEndPoint(Frame, self.EndPointVolume, self.EndPointArea)
 
 		return self.EndPointReached
 #-------------------------------------------------------------------------------
