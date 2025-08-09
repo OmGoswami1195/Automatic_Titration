@@ -1,6 +1,13 @@
 # Automatic Titration
 
-Worked under prof Gopi Ragupathy in his chemistry lab to automate titeration using openCV and to deploy it on a open source embedded micro-controller called raspberry pi and then later we deployed the image processing based on HSV on jetson nano 2gb variant GPU for better performance.
+Worked under professor Gopi Ragupathy in his PRP chemistry lab to automate titeration using openCV and to deploy it on a open source embedded micro-controller called raspberry pi and then later we deployed the image processing based on HSV on jetson nano 2gb variant GPU for better performance.
+
+- Download the video title `June 25, 2021.mp4` as this is the sample video used for titeration level detection
+- To run the code please use the command below
+- ensure that openCV is installed on your system
+```
+python3 testing_frames.py -s file -f "/home/<username>/Downloads/June 25, 2021.mp4"
+```
 
 # On raspberry pi 3b
 
